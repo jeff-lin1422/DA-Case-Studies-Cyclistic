@@ -1,0 +1,250 @@
+---
+title: "case_study_cicylistic"
+author: "Jeff"
+date: "7/15/2021"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+This is a case study where I work as an junior data analyst in the marketing analyst team at a imaginary company called Cyclistic. I was assigned the problem of how annual members use Cyclistic bikes differently to casual bikers. To clarify, a casual bikers are someone who purchase single-ride or full-day pass whereas annual members purchased a subscription for a year. Through these insights, I can make recommendations to the executive team regarding how to convert casual riders to annual riders for maximum profit. Because this is an imaginary company, the data set I will be using is a public data set that explores how different customers uses bikes. This data set is made available by Motivate International Inc. under this [license](https://www.divvybikes.com/data-license-agreement).
+
+## Setting up the environment
+```{r}
+library(tidyverse)
+library(lubridate)
+library(readxl)
+library(cowplot)
+library(gridExtra)
+```
+
+```{r}
+trip_data_2021_02 = read_excel("C:/Users/linje/OneDrive/Desktop/data_analysis/Case_Study/case_study_1/dataset/202102-divvy-tripdata.xlsx")
+trip_data_2021_03 = read_excel("C:/Users/linje/OneDrive/Desktop/data_analysis/Case_Study/case_study_1/dataset/202103-divvy-tripdata.xlsx")
+trip_data_2021_04 = read_excel("C:/Users/linje/OneDrive/Desktop/data_analysis/Case_Study/case_study_1/dataset/202104-divvy-tripdata.xlsx")
+```
+
+
+## Data Manipulation
+```{r}
+
+trip_data_2021_02 = mutate(trip_data_2021_02, ride_length_rounded = round_date(ride_length, "30 min"))
+trip_data_2021_02$ride_length_rounded <- format(trip_data_2021_02$ride_length_rounded, format = "%H:%M")
+#this creates a member only and casual only data set from the original one
+member_dow_2021_02 <- filter(trip_data_2021_02, member_casual == "member")
+casual_dow_2021_02 <- filter(trip_data_2021_02, member_casual == "casual")
+
+trip_data_2021_03 = mutate(trip_data_2021_03, ride_length_rounded = round_date(ride_length, "30 min"))
+trip_data_2021_03$ride_length_rounded <- format(trip_data_2021_03$ride_length_rounded, format = "%H:%M")
+#this creates a member only and casual only data set from the original one
+member_dow_2021_03 <- filter(trip_data_2021_03, member_casual == "member")
+casual_dow_2021_03 <- filter(trip_data_2021_03, member_casual == "casual")
+
+trip_data_2021_04 = mutate(trip_data_2021_04, ride_length_rounded = round_date(ride_length, "30 min"))
+trip_data_2021_04$ride_length_rounded <- format(trip_data_2021_04$ride_length_rounded, format = "%H:%M")
+#this creates a member only and casual only data set from the original one
+member_dow_2021_04 <- filter(trip_data_2021_04, member_casual == "member")
+casual_dow_2021_04 <- filter(trip_data_2021_04, member_casual == "casual")
+```
+
+
+## Data Visualization
+Here, we will see a series of visualization on the differences of member and casual bikers
+
+### Ride length of Member vs. Casual
+```{r}
+#this gets a graph of member and casual riders ride length
+ride_length_2021_02 <- ggplot(data = trip_data_2021_02) +
+  geom_histogram(mapping = aes(y = ride_length_rounded, fill = member_casual), stat = "count") +
+  facet_wrap(~member_casual) +
+  labs(title = "Ride length (2021 02)", subtitle = "Organized in a interval of 30 minutes", x = "number of bikers", y = "ride length") +
+  theme(plot.title = element_text(hjust = 0.5, size=12),
+        plot.subtitle = element_text(hjust = 0.5, size=9), 
+        legend.title = element_blank(), 
+        axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 8))
+ride_length_2021_02 <- ride_length_2021_02 + coord_cartesian(ylim = c(0, 6)) 
+
+ride_length_2021_03 <- ggplot(data = trip_data_2021_03) +
+  geom_histogram(mapping = aes(y = ride_length_rounded, fill = member_casual), stat = "count") +
+  facet_wrap(~member_casual) +
+  labs(title = "Ride length (2021 03)", subtitle = "Organized in a interval of 30 minutes", x = "number of bikers", y = "ride length") +
+  theme(plot.title = element_text(hjust = 0.5, size=12), 
+        plot.subtitle = element_text(hjust = 0.5, size=9), 
+        legend.title = element_blank(), 
+        axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 6))
+ride_length_2021_03 <- ride_length_2021_03 + coord_cartesian(ylim = c(0, 6)) 
+
+ride_length_2021_04 <- ggplot(data = trip_data_2021_04) +
+  geom_histogram(mapping = aes(y = ride_length_rounded, fill = member_casual), stat = "count") +
+  facet_wrap(~member_casual) +
+  labs(title = "Ride length (2021 04)", subtitle = "Organized in a interval of 30 minutes", x = "number of bikers", y = "ride length") +
+  theme(plot.title = element_text(hjust = 0.5, size=12), 
+        plot.subtitle = element_text(hjust = 0.5, size=9), 
+        legend.title = element_blank(), 
+        axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 7.5))
+ride_length_2021_04 <- ride_length_2021_04 + coord_cartesian(ylim = c(0, 6)) 
+
+plot_grid(ride_length_2021_02, ride_length_2021_03, ride_length_2021_04, ncol=2)
+```
+
+As the graph shows, the distribution of member's ride length throughout 3 month is roughly the same with the majority riding less than 30 minutes. On the other hand, there is roughly an equal distribution between casual riders that ride for less than 30 minutes and around 30 minutes throughout 3 month. Because the majority of member bikers ride less than 30 minutes, there is a high possibility of converting casual bikers who ride less than 30 minutes into a annual member.
+
+
+### Distribution of days in a week used by Member vs. Casual
+
+#### Setting up the graphs
+```{r}
+member_temp <- filter(trip_data_2021_02, trip_data_2021_02$member_casual == "member")
+dow_mem_2021_02_table <- table(member_temp$day_of_week)
+dow_mem_2021_02_frame <- as.data.frame(dow_mem_2021_02_table)
+colnames(dow_mem_2021_02_frame) <- c("day", "frequency")
+dow_mem_2021_02_frame <- mutate(dow_mem_2021_02_frame, type = "Feburary")
+dow_mem_2021_02_frame <- mutate(dow_mem_2021_02_frame, percentage = frequency/sum(frequency)*100)
+
+member_temp <- filter(trip_data_2021_03, trip_data_2021_03$member_casual == "member")
+dow_mem_2021_03_table <- table(member_temp$day_of_week)
+dow_mem_2021_03_frame <- as.data.frame(dow_mem_2021_03_table)
+colnames(dow_mem_2021_03_frame) <- c("day", "frequency")
+dow_mem_2021_03_frame <- mutate(dow_mem_2021_03_frame, type = "March")
+dow_mem_2021_03_frame <- mutate(dow_mem_2021_03_frame, percentage = frequency/sum(frequency)*100)
+
+member_temp <- filter(trip_data_2021_04, trip_data_2021_04$member_casual == "member")
+dow_mem_2021_04_table <- table(member_temp$day_of_week)
+dow_mem_2021_04_frame <- as.data.frame(dow_mem_2021_04_table)
+colnames(dow_mem_2021_04_frame) <- c("day", "frequency")
+dow_mem_2021_04_frame <- mutate(dow_mem_2021_04_frame, type = "April")
+dow_mem_2021_04_frame <- mutate(dow_mem_2021_04_frame, percentage = frequency/sum(frequency)*100)
+
+dow_2021_mem_frame <- rbind(dow_mem_2021_02_frame, dow_mem_2021_03_frame, dow_mem_2021_04_frame)
+dow_2021_mem_frame$type <- factor(dow_2021_mem_frame$type, levels = c("Feburary", "March", "April"))
+
+ggplot(data = dow_2021_mem_frame, aes(x=day, y = percentage, group = type, color = type)) +
+  geom_line(size = 1.4)+
+  labs(title = "Member Biker Day Distribution", color = "Month", x = "Day(1=Sunday, 2=Monday...)") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_y_continuous(name = "Percentage", breaks = seq(0,40,5), limits = c(5, 22))
+
+```
+
+```{r}
+casual_temp <- filter(trip_data_2021_02, trip_data_2021_02$member_casual == "casual")
+dow_cas_2021_02_table <- table(casual_temp$day_of_week)
+dow_cas_2021_02_frame <- as.data.frame(dow_cas_2021_02_table)
+colnames(dow_cas_2021_02_frame) <- c("day", "frequency")
+dow_cas_2021_02_frame <- mutate(dow_cas_2021_02_frame, type = "Feburary")
+dow_cas_2021_02_frame <- mutate(dow_cas_2021_02_frame, percentage = frequency/sum(frequency)*100)
+
+casual_temp <- filter(trip_data_2021_03, trip_data_2021_03$member_casual == "casual")
+dow_cas_2021_03_table <- table(casual_temp$day_of_week)
+dow_cas_2021_03_frame <- as.data.frame(dow_cas_2021_03_table)
+colnames(dow_cas_2021_03_frame) <- c("day", "frequency")
+dow_cas_2021_03_frame <- mutate(dow_cas_2021_03_frame, type = "March")
+dow_cas_2021_03_frame <- mutate(dow_cas_2021_03_frame, percentage = frequency/sum(frequency)*100)
+
+
+casual_temp <- filter(trip_data_2021_04, trip_data_2021_04$member_casual == "casual")
+dow_cas_2021_04_table <- table(casual_temp$day_of_week)
+dow_cas_2021_04_frame <- as.data.frame(dow_cas_2021_04_table)
+colnames(dow_cas_2021_04_frame) <- c("day", "frequency")
+dow_cas_2021_04_frame <- mutate(dow_cas_2021_04_frame, type = "April")
+dow_cas_2021_04_frame <- mutate(dow_cas_2021_04_frame, percentage = frequency/sum(frequency)*100)
+
+dow_2021_cas_frame <- rbind(dow_cas_2021_02_frame, dow_cas_2021_03_frame, dow_cas_2021_04_frame)
+dow_2021_cas_frame$type <- factor(dow_2021_cas_frame$type, levels = c("Feburary", "March", "April"))
+
+ggplot(data = dow_2021_cas_frame, aes(x=day, y = percentage, group = type, color = type)) +
+  geom_line(size = 1.4) +
+  labs(title = "Casual Biker Day Distribution", color = "Month", x = "Day(1=Sunday, 2=Monday...)") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_y_continuous(name = "Percentage", breaks = seq(0,40,5)) +
+  annotate("text", x=6, y=35, label="Highest Point", size = 3, col = "black")
+```
+
+
+Where as the member bikers has roughly an equal distribution on the days of week of the ride, the casual riders has an unequal distribution with the highest percentage being the weekend. We can use this information to target these audience on the benefit of annual member. It is also not a stretch to say that the weekend has the highest distribution because that is when people have days off from school or work. Knowing this information, we can create a special benefit for the members on a weekend such as free water or snack per person. 
+
+### Casual vs. Member ride type
+
+```{r}
+mem_bike_2021_02 <- member_dow_2021_02 %>% 
+  group_by(rideable_type) %>% 
+  summarize(count = n()) %>% 
+  mutate(percent = count/sum(count)) %>% 
+  ggplot(aes(y = rideable_type, x = count, fill = rideable_type)) +
+  geom_bar(stat="identity") +
+  geom_text(aes(label = paste0(round(100*percent, 1), "%")), vjust = 0) + 
+  labs(title = "Member bike type") +
+  theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+
+cas_bike_2021_02 <- casual_dow_2021_02 %>% 
+  group_by(rideable_type) %>% 
+  summarize(count = n()) %>% 
+  mutate(percent = count/sum(count)) %>% 
+  ggplot(aes(y = rideable_type, x = count, fill = rideable_type)) +
+  geom_bar(stat="identity") +
+  geom_text(aes(label = paste0(round(100*percent, 1), "%")), vjust = 0) + 
+  labs(title = "Casual bike type") +
+  theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+
+mem_bike_2021_03 <- member_dow_2021_03 %>% 
+  group_by(rideable_type) %>% 
+  summarize(count = n()) %>% 
+  mutate(percent = count/sum(count)) %>% 
+  ggplot(aes(y = rideable_type, x = count, fill = rideable_type)) +
+  geom_bar(stat="identity") +
+  geom_text(aes(label = paste0(round(100*percent, 1), "%")), vjust = 0) + 
+  labs(title = "Member bike type") +
+  theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+
+cas_bike_2021_03 <- casual_dow_2021_03%>% 
+  group_by(rideable_type) %>% 
+  summarize(count = n()) %>% 
+  mutate(percent = count/sum(count)) %>% 
+  ggplot(aes(y = rideable_type, x = count, fill = rideable_type)) +
+  geom_bar(stat="identity") +
+  geom_text(aes(label = paste0(round(100*percent, 1), "%")), vjust = 0) + 
+  labs(title = "Casual bike type") +
+  theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+
+mem_bike_2021_04 <- member_dow_2021_04 %>% 
+  group_by(rideable_type) %>% 
+  summarize(count = n()) %>% 
+  mutate(percent = count/sum(count)) %>% 
+  ggplot(aes(y = rideable_type, x = count, fill = rideable_type)) +
+  geom_bar(stat="identity") +
+  geom_text(aes(label = paste0(round(100*percent, 1), "%")), vjust = 0) + 
+  labs(title = "Member bike type") +
+  theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+
+cas_bike_2021_04 <- casual_dow_2021_04 %>% 
+  group_by(rideable_type) %>% 
+  summarize(count = n()) %>% 
+  mutate(percent = count/sum(count)) %>% 
+  ggplot(aes(y = rideable_type, x = count, fill = rideable_type)) +
+  geom_bar(stat="identity") +
+  geom_text(aes(label = paste0(round(100*percent, 1), "%")), vjust = 0) + 
+  labs(title = "Casual bike type") +
+  theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+```{r}
+grid.arrange(mem_bike_2021_02, mem_bike_2021_03, mem_bike_2021_04, nrow = 3)
+```
+
+```{r}
+grid.arrange(cas_bike_2021_02, cas_bike_2021_03, cas_bike_2021_04, nrow = 3)
+```
+
+There is a clear showing that only casual customers uses the docked bike, with around 16.4% of the casual bikers over the last 3 months. In addition, while both the casual and member ride the eletric bike, the casual customers has a slightly higher percentage of choosing eletric bike over classic bike. In addition, eletric bike is much faster than most people would cycle and it is easier to pedal, which could contribute to the fact that casual bikers have an higher average of picking eletric bike over members. 
